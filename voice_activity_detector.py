@@ -1,36 +1,24 @@
-import os
-import sys
-from dotenv import load_dotenv
-import signal
-from config_gui import ConfigGUI
+import numpy as np
+import torch
 
-def signal_handler(signum, frame):
-    print("\nSignal received, cleaning up...")
-    sys.exit(0)
 
-def main():
-    # Load environment variables
-    load_dotenv()
-    
-    # Verify API key is set
-    if not os.environ.get("GEMINI_API_KEY"):
-        print("Error: GEMINI_API_KEY environment variable is not set")
-        print("Please set it in your .env file or environment")
-        sys.exit(1)
-    
-    # Set up signal handlers
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    
-    try:
-        # Create and run GUI
-        gui = ConfigGUI()
-        gui.run()
-    except Exception as e:
-        print(f"Error running application: {e}")
-        sys.exit(1)
-    finally:
-        print("Application shutdown complete")
+class VoiceActivityDetector:
+    def __init__(self):
+        self.model, _ = torch.hub.load(repo_or_dir='snakers4/silero-vad',
+                                     model='silero_vad',
+                                     force_reload=False)
+        self.model.eval()
 
-if __name__ == "__main__":
-    main()
+    def is_speech(self, audio_data: bytes) -> bool:
+        # Convert raw bytes directly to numpy array of int16
+        audio_np = np.frombuffer(audio_data, dtype=np.int16)
+        
+        # Convert to float32 and normalize to [-1, 1]
+        audio_float = audio_np.astype(np.float32) / 32768.0
+        
+        # Convert to torch tensor
+        audio_tensor = torch.from_numpy(audio_float)
+        
+        # Get speech probability
+        speech_prob = self.model(audio_tensor, 16000).item()
+        return speech_prob > 0.8  # Adjust threshold as needed
