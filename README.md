@@ -2,9 +2,6 @@
 
 A desktop application built with Python and Tkinter that allows real-time, bidirectional voice conversations with Google's Gemini large language models. It supports optional video input (camera or screen sharing) and features various configurable "modes" with distinct personalities and parameters.
 
-![Screenshot Placeholder](placeholder.png)
-*(Suggestion: Replace placeholder.png with an actual screenshot of your GUI)*
-
 ## Features
 
 *   **Real-time Voice Interaction:** Speak directly to Gemini and hear its responses streamed back.
